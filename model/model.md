@@ -15,11 +15,11 @@
 | 数据集          | 光源 | 说明                                                         |
 | --------------- | ---- | ------------------------------------------------------------ |
 | bfd-c.json      | C    | Bradford University（英国布拉德福德大学） Foster等色彩科学家团队 |
-| bfd-d65.json    | D65  |                                                              |
+| bfd-d65.json    | D65  | CIEDE2000 设计时的核心数据集                                 |
 | bfd-m.json      | M    |                                                              |
 | leeds.json      | D65  | University of Leeds（利兹大学） 英国最强的色彩科学实验室之一 |
-| rit-dupont.json |      | RIT–DuPont 汽车涂料实验                                      |
-| witt.json       |      | Witt 实验                                                    |
+| rit-dupont.json |      | RIT（Rochester Institute of Technology）+ DuPont（杜邦公司）联合作业 |
+| witt.json       |      | U. Witt（Ulrich Witt）博士  20 世纪 80–90 年代研究色彩视觉色差感知的学者 |
 
 最终数据目录结构：
 
