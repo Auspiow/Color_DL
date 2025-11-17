@@ -1,4 +1,4 @@
-# 基于Transformer的感知色差预测模型
+# 基于AI的感知色差预测模型
 
 本工作旨在利用深度学习模型拟合旧有色彩心理物理实验中的“人类感知色差”（human perceptual color difference）。传统色差公式（如 ΔE76 / ΔE94 / ΔE2000）均为人工设计，而 AI 模型能够从跨数据集的实验数据中自动学习更符合人类主观视觉一致性的色差度量。
 
@@ -8,18 +8,18 @@
 
 为了构建统一且覆盖足够多颜色对的训练数据，我们使用 GitHub 上 Coloria 整合仓库：
 
-🔗 [https://github.com/coloria-dev/color-data](https://github.com/coloria-dev/color-data?utm_source=chatgpt.com)
+🔗 [https://github.com/coloria-dev/color-data](https://github.com/coloria-dev/color-data)
 
 从中选择了 1980–1990 年代最经典、使用最广的心理物理实验数据集：
 
-| 数据集          | 光源 | 说明                    |
-| --------------- | ---- | ----------------------- |
-| bfd-c.json      | C    | BFD（土耳其）、经典实验 |
-| bfd-d65.json    | D65  |                         |
-| bfd-m.json      | M    |                         |
-| leeds.json      | D65  | Leeds 色差实验          |
-| rit-dupont.json |      | RIT–DuPont 汽车涂料实验 |
-| witt.json       |      | Witt 实验               |
+| 数据集          | 光源 | 说明                                                         |
+| --------------- | ---- | ------------------------------------------------------------ |
+| bfd-c.json      | C    | Bradford University（英国布拉德福德大学） Foster等色彩科学家团队 |
+| bfd-d65.json    | D65  |                                                              |
+| bfd-m.json      | M    |                                                              |
+| leeds.json      | D65  | University of Leeds（利兹大学） 英国最强的色彩科学实验室之一 |
+| rit-dupont.json |      | RIT–DuPont 汽车涂料实验                                      |
+| witt.json       |      | Witt 实验                                                    |
 
 最终数据目录结构：
 
@@ -92,7 +92,7 @@ y_pred ∈ ℝ  # 模型预测的人类视觉色差 ΔE_vis
 
 ## 3. 模型结构（Transformer for Color Difference）
 
-本项目采用一个轻量级 Transformer 编码器，用于学习两个颜色 token 的关系：
+本项目一开始采用一个轻量级 Transformer 编码器，用于学习两个颜色 token 的关系：
 
 ```python
 import torch
@@ -122,7 +122,47 @@ class ColorTransformer(nn.Module):
         return self.fc(out)
 ```
 
----
+后来发现拟合效果不是特别好
+
+* **Transformer 是序列建模结构（attention sequence model）**
+
+* **Siamese 架构天生适合 metric learning（度量学习）**
+
+Siamese 编码器 + 距离 MLP 预测
+
+```python
+class SiameseColorNet(nn.Module):
+    def __init__(self, emb_dim=128):
+        super().__init__()
+        # (L,a,b) → 嵌入向量
+        self.encoder = nn.Sequential(
+            nn.Linear(3, 64),
+            nn.ReLU(),
+            nn.Linear(64, emb_dim),
+            nn.ReLU()
+        )
+        # |e1 - e2| → 预测 log1p(DE)（归一化后的）
+        self.head = nn.Sequential(
+            nn.Linear(emb_dim, emb_dim//2),
+            nn.ReLU(),
+            nn.Linear(emb_dim//2, 1)
+        )
+
+    def forward(self, x):
+        B = x.shape[0]
+        colors = x.view(B, 2, 3)
+        c1, c2 = colors[:,0,:], colors[:,1,:]
+        e1, e2 = self.encoder(c1), self.encoder(c2)
+        d = torch.abs(e1 - e2)
+        out = self.head(d).squeeze(-1)
+        return out
+
+model = SiameseColorNet(emb_dim=128).to(DEVICE)
+opt = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=1e-5)
+loss_fn = nn.HuberLoss(delta=1.0)
+```
+
+
 
 ## 4. 基线色差公式（Benchmark）
 
@@ -225,4 +265,3 @@ R(DE2000)  = 0.7754
 AI 模型显著超越 DE2000（≈ +0.15），达到接近人类间一致性（inter-observer consistency ≈ 0.90–0.95）。
 
 说明模型确实在学习“人类视觉感知”，而不仅仅是 Lab 几何距离。
-
