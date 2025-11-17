@@ -52,6 +52,39 @@ datasets/
 L1, a1, b1, L2, a2, b2 → DE_human
 ```
 
+完整数学公式（官方标准公式）
+
+给定：
+
+- 颜色 XYZ = (X, Y, Z)
+- 白点 XYZₙ = (Xₙ, Yₙ, Zₙ)
+
+首先归一化：
+$$
+x = \frac{X}{X_n},\quad y = \frac{Y}{Y_n},\quad z = \frac{Z}{Z_n}
+$$
+再定义辅助函数：
+$$
+f(t)=
+\begin{cases}
+t^{1/3} & t > \left(\frac{6}{29}\right)^3 \\
+\frac{1}{3}\left(\frac{29}{6}\right)^2 t + \frac{4}{29} & \text{否则}
+\end{cases}
+$$
+然后：
+
+L：明度
+$$
+L^* = 116 f(y) - 16
+$$
+a：红绿轴
+$$
+a^* = 500 (f(x) - f(y))
+$$
+b\：黄蓝轴
+$$
+b^* = 200 (f(y) - f(z))
+$$
 其中 Lab 使用 `colormath` 以 D65、2° observer 转换。
 
 ---
