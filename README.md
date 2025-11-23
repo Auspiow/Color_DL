@@ -19,9 +19,11 @@
 
 
 
+---
+
 ## 一. 色彩科学简介
 
-### 1. CIE（国际照明委员会）
+### CIE（国际照明委员会）
 
 **全称：** **C**ommission **I**nternationale de l'**É**clairage 国际照明委员会
 
@@ -29,87 +31,23 @@
 
 它是全球制定 **光、颜色、视觉感知标准** 的最高组织，几乎所有现代色彩空间都可追溯到 CIE 制定的体系。
 
-### 2. CIE XYZ 色彩空间（1931）[2]
+下面的图片展示了从色彩匹配实验→CIE 1931-RGB 色度系统→CIE 1931 XYX 色度系统的过程，主要参考知乎文章，就不赘述了。
 
-XYZ 是 CIE 依据 **数百名受试者的色匹配实验** 得出的基础色彩空间。
-这是一个 **三刺激值模型（三维）**：
 
-- **X**：与红光感受相关
-- **Y**：代表亮度（Luminance）
-- **Z**：与蓝光感受相关
 
-XYZ 本质上是：
+<img src="./images/v2-36b3af8900fe502236344c6622be4f78_r.png" alt="v2-36b3af8900fe502236344c6622be4f78_r" style="zoom:25%;" />
 
-> **人类视觉的数学拟合空间，而不是设备空间（如 RGB、CMYK）。**
+<img src="./images/v2-c168a38b726b38cf7e3ef851039ac406_r.png" alt="v2-c168a38b726b38cf7e3ef851039ac406_r" style="zoom:25%;" />
 
-它是线性的，可进行加法混色、光能计算，是所有现代色彩科学的根基。
+<img src="./images/v2-39313d9bcec625786ea318b64cbd8f77_1440w.png" alt="v2-39313d9bcec625786ea318b64cbd8f77_1440w" style="zoom:25%;" />
 
-### 3. 人眼感知的高度非线性
+<img src="./images/v2-be28903e6bd5ff7e817708f4f6f87b3f_1440w.png" alt="v2-be28903e6bd5ff7e817708f4f6f87b3f_1440w" style="zoom:25%;" />
 
-#### 3.1 亮度感受（亮度曲线）是非线性的
+<img src="./images/v2-21b121ab49d3ffae0c09483f9cddaf5a_1440w.png" alt="v2-21b121ab49d3ffae0c09483f9cddaf5a_1440w" style="zoom: 33%;" />
 
-物理亮度：1 → 2 → 4 → 8 → 16 人眼感觉接近等距。
-这是 **Stevens’ Power Law（斯蒂文斯幂律）**的典型体现。
+### 色彩科学的核心思想
 
-> 斯蒂文斯幂律是幂定律的一种，用幂函数关系描述心理感觉量与刺激的物理量之间的关系。该公式为 **Ψ = k · Iⁿ**
->
-> - **Ψ**：心理感觉量
-> - **I**：物理刺激强度
-> - 对于亮度（在明视觉条件下），斯蒂文斯幂律的指数 **n ≈ 0.33 ~ 0.5**
-
-#### 3.2 色彩分辨率不同（敛散性）
-
-- 人眼对**黄绿**最敏感（黄绿区域 ΔE 更小）
-- **蓝色**最不敏感
-- 红绿敏感更高（LM 双锥体竞争）
-
-#### 3.3 环境影响巨大
-
-同一颜色：
-
-- 暗室 vs 亮室
-- 黑背景 vs 白背景
-
-感知完全不同 → **色外观（Color Appearance）变化**
-
-这是 CAM16（以及 HCT）加入 ViewingConditions 的原因。
-
-### 4. 感知均匀化：CIE 的解决方案
-
-为了解决 XYZ ≠ 人类感受的问题，CIE提出了各种 **非线性色彩空间**。
-
-#### 4.1 CIE Lab / LCH（1976）
-
-对 XYZ 做非线性映射，使 ΔE 更接近人类感受：
-
-- L*：感知亮度
-- a*：绿 ↔ 红
-- b*：蓝 ↔ 黄
-- LCH：将 Lab 转为色调（Hue）、彩度、明度的极坐标形式
-
-#### 4.2 CIECAM02 / CAM16（色外观模型）
-
-比 Lab 更高级，模拟：场景亮度、背景亮度、对比度、源照明情况、光适应过程
-
-CAM16 是当前公开标准中**最先进的人类色彩外观模型**。
-
-#### 4.3 HCT（Google）
-
-Google 基于 CAM16 改造出：
-
-- H：Hue（色相）
-- C：Chroma（彩度）
-- T：Tone（明度）
-
-用于：
-
-- Material You 自动配色
-- 保持色相一致的主题色
-- 深色/浅色自适应
-
-它是一个**工程色彩空间**，本质不是科学标准，但广泛用于 UI/UX。
-
-### 5. 色彩科学的核心思想（非常重要）
+为了解决 XYZ ≠ 人类感受的问题，CIE提出了各种 **非线性色彩空间**
 
 所有色彩空间本质上都是在建立映射：
 
@@ -119,13 +57,13 @@ Google 基于 CAM16 改造出：
 
 > **让光学与感知之间的差异，通过数学被描述和可计算。**
 
+
+
 ---
 
-## 三.我想要做的事
+## 二. 利用深度学习拟合视觉感知
 
-### 1. AI 色彩感知模型
-
-**非常有前途，而且几乎一定会成为未来趋势。**
+#### 前言
 
 因为现在的色彩模型（XYZ → Lab → CAM16 → HCT）都依赖：
 
@@ -138,36 +76,21 @@ Google 基于 CAM16 改造出：
 
 👉 **视觉模型和显示设备的差距越来越大，但色彩空间没跟上。**
 
-###  2. 目前的研究
-
-**方向 A：使用深度学习学习 CIECAM-like 模型**
-
-一些研究团队（MIT, Adobe, Dolby）在尝试用 ML 学颜色的：
-
-- 色外观变化
-- HDR 场景下的色彩感知
-- 光适应（Chromatic Adaptation）
-- 亮度/对比度敏感性
-
-但都没有公开一套 **可直接替代 CAM16 的全新 AI 色彩空间**。
-
-**方向 B：OKLab / OKLCH 作者的尝试**
-
-Björn Ottosson 使用数学方式让 Lab 更均匀。
-
 > “如果能获得足够的视觉感知数据，可以使用深度学习拟合出更好的色彩空间。”
 
 👉 **目前没有任何模型能替代 CAM16/HCT。也没有任何 transformer 模型做 RGB → 感知线性映射。**
 
 你现在想做的这个方向几乎没被系统化探索。
 
-# 基于AI的感知色差预测模型
+====>
+
+## 基于Siamese的感知色差预测模型
 
 本工作旨在利用深度学习模型拟合旧有色彩心理物理实验中的“人类感知色差”（human perceptual color difference）。传统色差公式（如 ΔE76 / ΔE94 / ΔE2000）均为人工设计，而 AI 模型能够从跨数据集的实验数据中自动学习更符合人类主观视觉一致性的色差度量。
 
 以下为完整的项目说明文档。
 
-## 1. 数据集准备（Datasets）
+### 1. 数据集准备（Datasets）
 
 为了构建统一且覆盖足够多颜色对的训练数据，我们使用 GitHub 上 Coloria 整合仓库：
 
@@ -196,7 +119,7 @@ datasets/
 └─ witt.json
 ```
 
-### 1.1 数据格式（统一 JSON 结构）
+#### 1.1 数据格式（统一 JSON 结构）
 
 每个 JSON 文件均包含：
 
@@ -252,7 +175,7 @@ $$
 
 ---
 
-## 2.模型输入 / 输出设计
+### 2.模型输入 / 输出设计
 
 **输入特征（Feature Design）**
 
@@ -276,7 +199,7 @@ y_pred ∈ ℝ  # 模型预测的人类视觉色差 ΔE_vis
 
 此 ΔE_vis 不是任何已有色差公式，而是直接拟合实验中的“主观差异评分”。
 
-### 2.1 重要的数据预处理
+#### 2.1 重要的数据处理
 
 为了使训练更加稳定，使用：
 
@@ -286,43 +209,15 @@ y_pred ∈ ℝ  # 模型预测的人类视觉色差 ΔE_vis
 
 ---
 
-## 3. 模型结构（Transformer for Color Difference）
+### 3. 模型结构（Siamese for Color Difference）
 
-本项目一开始采用一个轻量级 Transformer 编码器，用于学习两个颜色 token 的关系：
+本项目一开始计划采用一个轻量级 Transformer 编码器，用于学习两个颜色 token 的关系。后来发现拟合效果不是特别好
 
-```python
-import torch
-import torch.nn as nn
+于是重新选择了更加合适的模型：
 
-class ColorTransformer(nn.Module):
-    def __init__(self, dim=32, depth=4, heads=4):
-        super().__init__()
+**Siamese 架构**天生适用于比较输入对的差异，并且通过**共享编码器**极大地减少了模型参数量，防止过拟合，同时加快训练速度。
 
-        self.embed = nn.Linear(3, dim)  # Lab → embedding
-
-        encoder_layer = nn.TransformerEncoderLayer(
-            d_model=dim,
-            nhead=heads,
-            dim_feedforward=128,
-            batch_first=True
-        )
-        self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=depth)
-
-        self.fc = nn.Linear(dim * 2, 1)  # flatten embeddings → scalar output
-
-    def forward(self, x):
-        # x: (batch, 2, 3)
-        e = self.embed(x)
-        out = self.encoder(e)
-        out = out.reshape(out.shape[0], -1)
-        return self.fc(out)
-```
-
-后来发现拟合效果不是特别好
-
-* **Transformer 是序列建模结构（attention sequence model）**
-
-* **Siamese 架构天生适合 metric learning（度量学习）**
+选择 **Huber Loss ($\delta=1.0$)** 而非传统的 MSE。Huber Loss 对人类评分中可能存在的异常值或标注错误具有更好的鲁棒性，因为它结合了 L1 和 L2 损失的优点
 
 Siamese 编码器 + 距离 MLP 预测
 
@@ -358,9 +253,9 @@ opt = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=1e-5)
 loss_fn = nn.HuberLoss(delta=1.0)
 ```
 
+---
 
-
-## 4. 基线色差公式（Benchmark）
+### 4. 基线色差公式（Benchmark）
 
 为了评估模型是否真正“比 ΔE 更像人类”，我们使用以下基线：
 
@@ -371,14 +266,7 @@ loss_fn = nn.HuberLoss(delta=1.0)
 | ΔE2000   | 当前最常用             |
 | OKLab ΔE | perceptual color space |
 
-### 4.1 Oklab ΔE
-
-```python
-def oklab_de(l1,a1,b1,l2,a2,b2):
-    return np.sqrt((l1-l2)**2 + (a1-a2)**2 + (b1-b2)**2)
-```
-
-### 4.2 ΔE2000
+#### ΔE2000
 
 ```python
 from colormath.color_objects import LabColor
@@ -392,7 +280,7 @@ def de2000(row):
 
 ---
 
-## 5. 评价指标（Evaluation Metrics）
+### 5. 评价指标（Evaluation Metrics）
 
 使用皮尔逊相关系数 Pearson R 衡量模型输出与人类实验的相关性：
 
@@ -404,9 +292,9 @@ r = pearsonr(true_values, predicted_values)[0]
 
 ---
 
-## 6. 可视化与实验结果（Visualization）
+### 6. 可视化与实验结果（Visualization）
 
-### 6.1 散点图：AI vs Human
+#### 6.1 散点图：AI vs Human
 
 ```
 plt.figure()
@@ -421,7 +309,7 @@ plt.close()
 
 <img src="./output/scatter_siamese_pred_vs_human.png" style="zoom: 50%;" />
 
-### 6.2 误差直方图（error hist）
+#### 6.2 误差直方图（error hist）
 
 ```
 err = (preds_un.ravel() - true_all.ravel())
@@ -434,7 +322,7 @@ plt.close()
 
 <img src="./output/hist_error_siamese.png" style="zoom:50%;" />
 
-### 6.3 R值对比图（R comparison bar）
+#### 6.3 R值对比图（R comparison bar）
 
 ```
 plt.figure()
@@ -449,7 +337,7 @@ plt.close()
 
 <img src="./output/r_comparison_siamese.png" style="zoom:50%;" />
 
-### 6.4 实验结果
+#### 6.4 实验结果
 
 当前模型（经过 log-scaling + balanced sampling + Huber Loss）：
 
@@ -464,38 +352,76 @@ AI 模型显著超越 DE2000（≈ +0.15），达到接近人类间一致性（i
 
 
 
-### 1. 数据处理与目标值转换 (Methodological Innovation)
+---
+
+## 3. 神经网络模型转化为数学工具或算法
+
+将这个训练好的神经网络模型**转化为数学工具或算法**，以便在其他环境或程序中调用，而无需运行完整的 PyTorch 框架，可以大大提高预测速度和易用性。
+
+模型 (SiameseColorNet) 的工作流程是：
+
+Lab 颜色对 $\rightarrow$ 编码器 $\rightarrow$ 距离计算 $\rightarrow$ MLP 预测头 $\rightarrow$ $\Delta E$ 预测值
+
+由于您的模型是一个相对简单的 **MLP（多层感知器）**结构，将其转化为纯数学函数或算法非常直接。
+
+#### 1. 提取权重和偏置 (Extraction)
+
+神经网络的本质是一系列矩阵乘法和非线性激活函数的组合，从训练好的模型中提取所有参数：
+
+| **层**      | **参数**          | **作用**                                       |
+| ----------- | ----------------- | ---------------------------------------------- |
+| `encoder.0` | $W_{e1}, B_{e1}$  | 第 1 层权重/偏置（3 $\rightarrow$ 64）         |
+| `encoder.2` | $W_{e2}, B_{e2}$  | 第 2 层权重/偏置（64 $\rightarrow$ 128）       |
+| `head.0`    | $W_{h1}, B_{h1}$  | 预测头第 1 层权重/偏置（128 $\rightarrow$ 64） |
+| `head.2`    | $W_{h2}, B_{h2}$  | 预测头第 2 层权重/偏置（64 $\rightarrow$ 1）   |
+| 目标值      | $\mu_y, \sigma_y$ | 归一化/反归一化所需的均值和标准差              |
+
+操作：
+
+在 model.py 中模型训练完成后，加载模型权重，并使用 model.state_dict() 将这些张量参数保存为 .npy 或其他易于读取的格式。
+
+#### 2. 模型核心算法 (The Algorithm)
+
+对于一对颜色 $C_1 = (L_1, a_1, b_1)$ 和 $C_2 = (L_2, a_2, b_2)$，预测 $\Delta E_{pred}$ 的算法步骤如下：
+
+1. 编码器（共享）：
+
+   $$\begin{aligned} E_1 &= \text{ReLU}(C_1 W_{e1} + B_{e1}) \\ E_1 &= \text{ReLU}(E_1 W_{e2} + B_{e2}) \\ E_2 &= \text{ReLU}(C_2 W_{e1} + B_{e1}) \\ E_2 &= \text{ReLU}(E_2 W_{e2} + B_{e2})\end{aligned}$$
+
+   （注意：此处的 $W$ 是矩阵，计算顺序可能为 $C \cdot W^T$ 或 $C \cdot W$ 取决于 PyTorch 的实现，但数学上是一致的。）
+
+2. 距离计算：
+
+   $$D = |E_1 - E_2|$$
+
+3. 预测头（MLP）：
+
+   $$H = \text{ReLU}(D W_{h1} + B_{h1})$$
+
+   $$\Delta E_{norm} = H W_{h2} + B_{h2}$$
+
+4. 反归一化 (Inverse Normalization)：
+
+   $$\Delta E_{log} = \Delta E_{norm} \cdot \sigma_y + \mu_y$$
+
+5. 反 $\text{log}(1+x)$ 变换：
+
+   $$\Delta E_{pred} = e^{\Delta E_{log}} - 1$$
 
 
 
-创新不是只体现在网络结构上，更重要的是您如何让网络能够有效学习复杂的人类感知数据。
+可能的应用场景:
 
-- **处理长尾分布 (Log-Transform):** 您没有直接使用原始的 $\Delta E$ 人类评分作为目标，而是使用了 $\text{log}(1 + y)$ 进行转换和归一化。这是应对人眼感知评分**严重的长尾分布**的关键步骤，它有效地压缩了目标变量范围，使得模型训练更加稳定和准确。
-- **对称性增强 (Data Augmentation):** 您通过对调颜色对 ($\text{Color}_1 \leftrightarrow \text{Color}_2$) 进行数据增强，使样本量翻倍。这不仅增加了训练数据，更重要的是**强制模型学习到颜色差异的对称性**，即 $\Delta E(c_1, c_2) = \Delta E(c_2, c_1)$，这是模型鲁棒性的重要保证。
-- **平衡采样策略 (Weighted Sampling):** 您通过对 $\Delta E$ 值进行分桶，并使用**逆频率加权随机采样**来处理数据集中不同 $\Delta E$ 值样本数量不均的问题。这是一个高级的训练技巧，能确保模型不会只关注数据量最大的常见差异值，从而提升整体泛化能力。
-
-
-
-### 2. 颜色空间工程与鲁棒性
-
-
-
-您针对颜色数据的特殊性进行了定制化的工程。
-
-- **精确的 Lab 到 RGB 转换：** 您使用了专业级的 `colormath` 库来执行 Lab 到 sRGB 的标准转换，确保导出的颜色在 Web 上是**准确的、伽马校正后的**，这在颜色科学应用中是基础而关键的一步。
-- **展示优化 (去重与随机采样)：** 您最新的修改加入了**随机打乱**和**视觉去重**逻辑。这解决了由于原始数据分布不均（如您发现的低亮度数据）导致的展示效果单一问题，是针对**最终用户体验**的工程优化。
+| **行业**                      | **应用场景**           | **价值体现**                                                 |
+| ----------------------------- | ---------------------- | ------------------------------------------------------------ |
+| **制造业 (塑料、油漆、纺织)** | **智能质量控制**       | 用于实时检测生产线上产品的颜色偏差。由于您的模型与人眼感知相关性更高，它能更准确地判断产品是否会因颜色问题而被人类客户拒绝，从而**减少误判和不必要的废品**。 |
+| **印刷和包装**                | **印刷校准和容差设定** | 用于定义印刷品的最大可接受颜色差异。使用更准确的 $\Delta E_{vis}$ (您的模型预测值)，可以确保不同批次、不同打印机之间的颜色一致性。 |
+| **数字化设计 (CAD/3D)**       | **材质渲染验证**       | 在虚拟现实或 3D 渲染中，用于验证虚拟材质的颜色是否与目标颜色匹配。这确保了在不同显示器和光照下的颜色一致性。 |
+| **色彩管理软件**              | **核心差异计算**       | 可以集成到专业的色彩管理软件中，作为 $\Delta E$ 计算的新标准，为用户提供比 $\Delta E_{2000}$ 更符合人眼感受的颜色差异指标。 |
 
 
 
-### 3. 模型定制与评估
-
-
-
-- **Siamese 架构的应用：** 虽然 Siamese 网络结构本身是已知的，但**将其应用于颜色差异感知**是一个巧妙且高效的设计选择。它天生适用于比较输入对的差异，并且通过**共享编码器**极大地减少了模型参数量，防止过拟合，同时加快训练速度。
-- **损失函数的选择：** 您选择了 **Huber Loss ($\delta=1.0$)** 而非传统的 MSE。Huber Loss 对人类评分中可能存在的异常值或标注错误具有更好的鲁棒性，因为它结合了 L1 和 L2 损失的优点。
-- **行业标准对比 (Benchmarking):** 您的项目明确计算了模型预测结果与行业标准 **$\Delta E_{2000}$ 的 Pearson R 相关系数**，用量化指标证明了您的模型在模拟人类感知方面优于传统公式。
-
-
+### 参考资料/文献
 
 【1】维基百科/CIE
 
@@ -512,3 +438,11 @@ https://www.colour-science.org/api/0.3.2/html/_modules/colour/models/rgb.html
 【4】Google/material-color-utilities官方github仓库
 
 https://github.com/material-foundation/material-color-utilities/tree/main/dart/lib/hct
+
+【5】知乎 色域马蹄图是怎么来的？——CIE 1931 XYZ色彩空间详解
+
+https://zhuanlan.zhihu.com/p/137639368
+
+【6】数据集来源
+
+https://github.com/coloria-dev/color-data
