@@ -9,7 +9,7 @@
 ├─datasets   # 数据集
 ├─frontend   # 前端
 ├─hct+xyz    # 标准转换算法
-├─model      # Siamese深度学习网络
+├─model      # Siamese深度学习网络以及转换函数
 └─output     # 图表和数据
 ```
 
@@ -408,7 +408,75 @@ Lab 颜色对 $\rightarrow$ 编码器 $\rightarrow$ 距离计算 $\rightarrow$ M
 
    $$\Delta E_{pred} = e^{\Delta E_{log}} - 1$$
 
+ `.pth` 文件中包含了SiameseColorNet 模型经过复杂训练后得到的所有**数值化“知识”**，即所有的权重 ($W$) 和偏置 ($B$)。
 
+```
+# =======================================================
+# 2. 加载权重并提取参数
+# =======================================================
+PTH_PATH = "output/checkpoints_siamese.pth" 
+OUTPUT_DIR_ALGO = "output/algorithm_params" # 新的参数输出目录
+os.makedirs(OUTPUT_DIR_ALGO, exist_ok=True)
+
+model = SiameseColorNet(emb_dim=128)
+# 无论训练时是否使用GPU，我们都加载到CPU上
+state_dict = torch.load(PTH_PATH, map_location=torch.device('cpu')) 
+model.load_state_dict(state_dict)
+model.eval()
+
+# 存储所有提取的参数的字典
+extracted_params = {}
+
+# 遍历模型中的所有命名参数
+for name, param in model.named_parameters():
+    # 将 PyTorch Tensor 转换为 NumPy 数组
+    np_array = param.data.numpy() 
+    
+    # 规范化名称，便于后续代码中识别 (例如：encoder_0_W, head_2_B)
+    clean_name = name.replace('.', '_')
+    extracted_params[clean_name] = np_array
+    
+    # 将每个参数单独保存为 .npy 文件
+    np.save(os.path.join(OUTPUT_DIR_ALGO, f"{clean_name}.npy"), np_array)
+    print(f"已保存参数: {clean_name}.npy, 形状: {np_array.shape}")
+```
+
+运行export.py代码后，您的 `output/algorithm_params` 文件夹中将包含所有的 **`.npy` 文件**，例如：
+
+- `encoder_0_weight.npy`
+- `encoder_0_bias.npy`
+- ...
+- `head_2_weight.npy`
+- `head_2_bias.npy`
+- `NORM_MEAN.npy`
+- `NORM_STD.npy`
+
+#### 输入/常数
+
+- **输入向量：** $C_1 = (L_1, a_1, b_1)$ 和 $C_2 = (L_2, a_2, b_2)$。
+- **模型常数：** 共 8 个权重和偏置矩阵（$W, B$），以及 2 个归一化常数（$\mu_y, \sigma_y$）。
+  - **归一化常数：** $\mu_y = y_{mean}$，$\sigma_y = y_{std}$。
+  - **权重/偏置：** $W_{e1}, B_{e1}, W_{e2}, B_{e2}$ (编码器)；$W_{h1}, B_{h1}, W_{h2}, B_{h2}$ (预测头)。
+
+#### 算法步骤
+
+##### A. 颜色编码器 (Siamese Encoder)
+
+对 $C_1$ 和 $C_2$ 使用共享的权重矩阵，计算其 128 维的嵌入向量 ($E_1, E_2$)：
+
+$$\begin{aligned} E_{1\_hidden} &= \text{ReLU}(C_1 W_{e1}^T + B_{e1}) \\ E_1 &= \text{ReLU}(E_{1\_hidden} W_{e2}^T + B_{e2}) \\ E_{2\_hidden} &= \text{ReLU}(C_2 W_{e1}^T + B_{e1}) \\ E_2 &= \text{ReLU}(E_{2\_hidden} W_{e2}^T + B_{e2}) \end{aligned}$$
+
+##### B. 差异度量与预测头 (Difference and Prediction Head)
+
+计算嵌入距离，并通过 MLP 预测归一化后的 $\Delta E$ 值：
+
+$$\begin{aligned} D &= |E_1 - E_2| \quad \text{(计算绝对差值)} \\ H &= \text{ReLU}(D W_{h1}^T + B_{h1}) \\ \Delta E_{norm} &= H W_{h2}^T + B_{h2} \end{aligned}$$
+
+##### C. 反归一化与最终 $\Delta E$
+
+将预测结果反向转换，得到最终的人眼感知颜色差异值：
+
+$$\begin{aligned} \Delta E_{log} &= \Delta E_{norm} \cdot \sigma_y + \mu_y \\ \Delta E_{pred} &= \exp(\Delta E_{log}) - 1 \end{aligned}$$
 
 可能的应用场景:
 

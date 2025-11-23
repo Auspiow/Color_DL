@@ -88,27 +88,3 @@ with open(os.path.join(OUTPUT_DIR_ALGO, "norm_constants.json"), "w") as f:
     json.dump({"y_mean": y_mean, "y_std": y_std}, f, indent=2)
     
 print(f"\n已将归一化常数和 {len(extracted_params)} 个权重/偏置矩阵导出到 {OUTPUT_DIR_ALGO}。")
-
-
-# =======================================================
-# 4. 最终算法概述（供参考）
-# =======================================================
-print("\n===== 简洁算法的最终数学模型 =====")
-print("输入: C1(L1, a1, b1), C2(L2, a2, b2) - 均为 1x3 向量")
-print("常数: W/B 矩阵 (共 8 个) 和 归一化常数 (y_mean, y_std)")
-
-print("\n--- A. 编码器 (Encoder) ---")
-print("E1_hidden = ReLU(C1 @ encoder_0_W.T + encoder_0_B)")
-print("E1 = ReLU(E1_hidden @ encoder_2_W.T + encoder_2_B)")
-print("E2_hidden = ReLU(C2 @ encoder_0_W.T + encoder_0_B)")
-print("E2 = ReLU(E2_hidden @ encoder_2_W.T + encoder_2_B)")
-print(" (注意: W.T 表示权重矩阵需要转置)")
-
-print("\n--- B. 预测头 (Head) ---")
-print("D = ABS(E1 - E2)  # 绝对差值")
-print("H = ReLU(D @ head_0_W.T + head_0_B)")
-print("ΔE_norm = H @ head_2_W.T + head_2_B")
-
-print("\n--- C. 反归一化 ---")
-print("ΔE_log = ΔE_norm * y_std + y_mean")
-print("ΔE_pred = exp(ΔE_log) - 1")
